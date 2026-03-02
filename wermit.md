@@ -231,7 +231,8 @@ but I cant just use that because that only happens if we are sorting the list, t
 
 so! 
 
-## solution
+## solution 
+#### (update: this was not a good solution, much of the section stands though)
 
 do I:
 - move that "maxspeedlen" out and alloc everything with it
@@ -278,3 +279,17 @@ or... it would be if this was in any way related to that macos `malloc` problem.
 also I have zero clue if my realloc is portable across even a tiny subset of the shit kermit builds for, you may notice in that Blame that theres some code and comments about issues on vms, and with non-constant array dimensions being a C99 feature...
 
 future me problem, or someone elses problem I guess.
+
+## update:
+
+scratch the above solution, it's stupid, I hadn't reallized the real issue, sorting was sort of happening Twice...
+
+in `C-Kermit 7.0.197` there's a [chunk of code](https://github.com/KermitProject/ckermit/blob/d0f8b1da7aea5bf3912e4289bfb23c988b0e7c60/ckuus5.c#L805-L847) which purport to generate a sorted list of speeds, but it [apparently](https://github.com/KermitProject/ckermit/blob/main/NOTES.TXT#L118-L137) wasnt working.
+
+I have now ripped out the ~1997 code which was playing a little fast and loose with its allocations and was hard to follow in its "sorting". This has made no changes to existing assumptions about sortedness, and the code now relies solely on the `#ifndef NOSORTSPEEDS` block for sorting of the speed list. 
+
+### bonus note:
+
+Since stripping that I have _not_ found the speeds list to be unsorted. I am electing to keep the `NOSORTSPEEDS` block for the moment as I do not know if there could be cases where the list is not sorted.
+
+I hope to take a closer look and check if the explicit sorting is needed. But for now the patch can be found [here](./kermit-patch)
